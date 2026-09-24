@@ -5,15 +5,30 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Live Question</title>
   <link id="theme-stylesheet" rel="stylesheet" href="/themes/live/default.css">
+  <style>
+    /* Ensure lower-left constraint is enforced regardless of theme */
+    body.has-live-question #qr-container {
+      position: fixed;
+      bottom: 24px;
+      left: 24px;
+      max-width: 25vw;
+      max-height: 25vh;
+      z-index: 100;
+    }
+  </style>
 </head>
 <body>
   <div id="live-question-container">
-    <div id="qr-code-container" style="margin-bottom: 20px;"></div>
-    <div id="event-name">VBC Live Event</div>
     <div id="live-question"></div>
     <div id="username"></div>
+  </div>
+
+  <div id="qr-container">
+    <div id="qr-code-container"></div>
+    <div id="event-name">VBC Live Event</div>
     <div id="event-url">Event URL: Not Set</div>
   </div>
+
   <script src="/socket.io/socket.io.js"></script>
   <script src="/AdditionalLibraries/qrcode.js"></script>
   <script>
@@ -28,8 +43,11 @@
       console.log('Connected to server:', socket.id);
     });
     // END TEST
+
+    const liveQuestionContainer = document.getElementById('live-question-container');
     const display = document.getElementById('live-question');
     const user = document.getElementById('username');
+    const qrContainer = document.getElementById('qr-container');
     const eventName = document.getElementById('event-name');
     const eventUrl = document.getElementById('event-url');
     const qrCodeContainer = document.getElementById('qr-code-container');
@@ -37,42 +55,48 @@
     let currentEventName = 'VBC Live Event'; // Default event name
     let currentEventURL = 'Event URL: Not Set'; // Default event URL
 
-    socket.on('live_question', (question) => {
-      const eventNameContainer = document.getElementById('event-name');
-      const eventUrlContainer = document.getElementById('event-url');
-      const liveQuestionContainer = document.getElementById('live-question');
-      const usernameContainer = document.getElementById('username');
+    function formatEventUrl(url) {
+      if (url && url !== 'Event URL: Not Set') {
+        return url.startsWith('To submit') ? url : `To submit questions, please visit ${url}`;
+      }
+      return 'Event URL: Not Set';
+    }
 
+    socket.on('live_question', (question) => {
       if (question) {
         // Display the live question and username
+        document.body.classList.add('has-live-question');
         user.textContent = question.username ? `- ${question.username}` : '- Anonymous';
         display.textContent = question.text;
 
-        // Hide Event Name and Event URL
-        eventNameContainer.style.display = 'none';
-        eventUrlContainer.style.display = 'none';
-        qrCodeContainer.style.display = 'none';
+        // Hide Event Name (Event URL and QR Code remain visible in lower-left)
+        eventName.style.display = 'none';
+        eventUrl.style.display = 'block';
+        qrCodeContainer.style.display = 'block';
 
         // Show live question and username
-        liveQuestionContainer.style.display = 'block';
-        usernameContainer.style.display = 'block';
+        liveQuestionContainer.style.display = 'flex';
+        display.style.display = 'block';
+        user.style.display = 'block';
       } else {
-        // Clear the live question display and show the participant view URL
+        // Clear the live question display and show the participant view URL in center
+        document.body.classList.remove('has-live-question');
         user.textContent = '';
         display.textContent = '';
 
-        // Show Event Name and Event URL
-        eventNameContainer.style.display = 'block';
-        eventUrlContainer.style.display = 'block';
+        // Show Event Name, Event URL, and QR Code in center
+        eventName.style.display = 'block';
+        eventUrl.style.display = 'block';
         qrCodeContainer.style.display = 'block';
 
         // Hide live question and username
         liveQuestionContainer.style.display = 'none';
-        usernameContainer.style.display = 'none';
+        display.style.display = 'none';
+        user.style.display = 'none';
 
         // Restore the stored values for Event Name and Event URL
         eventName.textContent = currentEventName;
-        eventUrl.textContent = currentEventURL;
+        eventUrl.textContent = formatEventUrl(currentEventURL);
       }
     });
 
@@ -89,7 +113,7 @@
 
       if (storedEventURL) {
         currentEventURL = storedEventURL; // Update the stored value
-        eventUrl.textContent = `To submit questions, please visit ${storedEventURL}`; // Update the DOM
+        eventUrl.textContent = formatEventUrl(currentEventURL); // Update the DOM
         generateQRCode(currentEventURL); // Generate QR code for the stored URL
       }
     });
@@ -104,9 +128,11 @@
     // Listen for event URL updates and save to localStorage
     socket.on('event_url_updated', ({ eventURL }) => {
       currentEventURL = eventURL; // Store the raw URL
-      eventUrl.textContent = `To submit questions, please visit ${eventURL}`; // Update the DOM with the concatenated string
+      eventUrl.textContent = formatEventUrl(currentEventURL); // Update the DOM with the concatenated string
       localStorage.setItem('live_eventIP', currentEventURL); // Save the raw URL to localStorage
-      generateQRCode(currentEventURL); // Generate QR code for the raw URL
+      if (currentEventURL && currentEventURL !== 'Event URL: Not Set') {
+        generateQRCode(currentEventURL); // Generate QR code for the raw URL
+      }
     });
 
     // Apply theme updates from server
@@ -116,6 +142,7 @@
 
     // Function to generate a QR code
     function generateQRCode(url) {
+      if (!url || url === 'Event URL: Not Set') return;
       // debugging - log the URL being used for QR code generation
       console.log('Generating QR code for URL:', url);
 
@@ -132,7 +159,6 @@
         correctLevel: QRCode.CorrectLevel.L // Error correction level
       });
     }
-    
   </script>
 </body>
 </html>

@@ -616,6 +616,9 @@ io.on('connection', (socket) => {
   socket.emit('event_datetime_updated', { eventDatetime: currentEventDatetime });
   // Send current theme config to the newly connected client
   const cfg = loadConfig();
+  if (cfg && cfg.eventURL) {
+    socket.emit('event_url_updated', { eventURL: cfg.eventURL });
+  }
   socket.emit('theme_updated', cfg.themes || {});
   // Send available themes organized by view
   socket.emit('available_themes', listThemesByView());
