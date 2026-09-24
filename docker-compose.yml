@@ -1,6 +1,6 @@
 services:
   vbc_liveqa:
-    image: ghcr.io/rotundwizard/Live_Q-A:latest
+    image: ghcr.io/rotundwizard/live_q-a:latest
     ports:
       - "3000:3000"
     volumes:
