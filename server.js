@@ -590,15 +590,6 @@ io.on('connection', (socket) => {
     });
   });
 
-  socket.on('save_event_config', ({ eventName, eventURL, eventDatetime }) => {
-    console.log('Received eventDatetime from moderator:', eventDatetime);
-    currentEventName = eventName;
-    currentEventDatetime = eventDatetime;
-    console.log('Event updated:', eventName, eventURL, eventDatetime);
-    io.emit('event_name_updated', { eventName });
-    io.emit('event_url_updated', { eventURL });
-    io.emit('event_datetime_updated', { eventDatetime });
-  });
   socket.on('save_event_config', ({ eventName, eventURL, eventDatetime, themes }) => {
     console.log('Received eventDatetime from moderator:', eventDatetime);
     currentEventName = eventName;
