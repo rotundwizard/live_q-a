@@ -425,7 +425,7 @@ io.on('connection', (socket) => {
     }
 
     else if (action === 'cancel_next_up') {
-      db.run("UPDATE questions SET status = 'submitted' WHERE id = ?", [id], (err) => {
+      db.run("UPDATE questions SET status = 'approved' WHERE id = ?", [id], (err) => {
         if (!err) {
           io.emit('next_up_question', null);
           emitAllQuestions();
@@ -590,15 +590,6 @@ io.on('connection', (socket) => {
     });
   });
 
-  socket.on('save_event_config', ({ eventName, eventURL, eventDatetime }) => {
-    console.log('Received eventDatetime from moderator:', eventDatetime);
-    currentEventName = eventName;
-    currentEventDatetime = eventDatetime;
-    console.log('Event updated:', eventName, eventURL, eventDatetime);
-    io.emit('event_name_updated', { eventName });
-    io.emit('event_url_updated', { eventURL });
-    io.emit('event_datetime_updated', { eventDatetime });
-  });
   socket.on('save_event_config', ({ eventName, eventURL, eventDatetime, themes }) => {
     console.log('Received eventDatetime from moderator:', eventDatetime);
     currentEventName = eventName;
