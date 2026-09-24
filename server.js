@@ -28,7 +28,9 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(express.static('public'));
 
-const db = new sqlite3.Database('./database/questions.db');
+const DB_DIR = path.join(__dirname, 'database');
+if (!fs.existsSync(DB_DIR)) fs.mkdirSync(DB_DIR, { recursive: true });
+const db = new sqlite3.Database(path.join(DB_DIR, 'questions.db'));
 
 const CONFIG_DIR = path.join(__dirname, 'config');
 const CONFIG_PATH = path.join(CONFIG_DIR, 'event_config.json');
@@ -425,7 +427,7 @@ io.on('connection', (socket) => {
     }
 
     else if (action === 'cancel_next_up') {
-      db.run("UPDATE questions SET status = 'submitted' WHERE id = ?", [id], (err) => {
+      db.run("UPDATE questions SET status = 'approved' WHERE id = ?", [id], (err) => {
         if (!err) {
           io.emit('next_up_question', null);
           emitAllQuestions();
@@ -590,15 +592,6 @@ io.on('connection', (socket) => {
     });
   });
 
-  socket.on('save_event_config', ({ eventName, eventURL, eventDatetime }) => {
-    console.log('Received eventDatetime from moderator:', eventDatetime);
-    currentEventName = eventName;
-    currentEventDatetime = eventDatetime;
-    console.log('Event updated:', eventName, eventURL, eventDatetime);
-    io.emit('event_name_updated', { eventName });
-    io.emit('event_url_updated', { eventURL });
-    io.emit('event_datetime_updated', { eventDatetime });
-  });
   socket.on('save_event_config', ({ eventName, eventURL, eventDatetime, themes }) => {
     console.log('Received eventDatetime from moderator:', eventDatetime);
     currentEventName = eventName;
