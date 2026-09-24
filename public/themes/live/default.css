@@ -4,44 +4,166 @@ html, body {
   display: flex; /* Enable flexbox */
   justify-content: center; /* Center horizontally */
   align-items: center; /* Center vertically */
-  font-family: sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   text-align: center;
   background: #000000;
+  overflow: hidden;
+  box-sizing: border-box;
 }
+
 #live-question-container {
-  display: flex;
+  display: none;
   flex-direction: column; /* Stack children vertically */
   align-items: center; /* Center children horizontally */
+  justify-content: center;
+  width: 100%;
+  max-width: 85vw;
+  box-sizing: border-box;
+  z-index: 10;
+  transition: opacity 0.3s ease;
 }
+
 #live-question {
   font-size: calc(2vh + 2vmin + 2vw);
-  color: white;
+  color: #ffffff;
   padding: 20px;
+  line-height: 1.25;
+  word-break: break-word;
+  font-weight: 600;
+  text-shadow: 0 2px 12px rgba(0, 0, 0, 0.7);
 }
+
 #username {
   font-style: italic;
   font-size: calc(1vh + 1vmin + 1vw);
   color: #e7ff2e;
   margin-top: 10px;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.7);
 }
+
 #event-name {
   font-size: calc(2vh + 2vmin + 1vw);
   color: #ffffff;
   margin-top: 20px;
+  font-weight: 500;
 }
+
 #event-url {
   font-size: calc(1.5vh + 1.5vmin + 1.5vw);
   color: #ffffff;
   margin-top: 10px;
+  word-break: break-word;
 }
 
-#qr-code-container img {
-  width: 50vw; /* 20% of viewport width */
-  height: auto; /* Maintain aspect ratio */
-  max-width: 100%; /* Ensure it doesn't exceed 100% of the parent container */
-  max-height: 50vh; /* Ensure it doesn't exceed 20% of the viewport height */
-  /* You can also use max-width and max-height as a percentage of the parent container */
-  /* max-width: 50%; */
-  /* max-height: 50%; */
-  object-fit: contain; /* Maintain aspect ratio and fit within the container */
+/* Idle state for QR container (centered on screen) */
+#qr-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  box-sizing: border-box;
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
 }
+
+#qr-code-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+#qr-code-container img,
+#qr-code-container canvas {
+  width: 50vw; /* 50% of viewport width in idle mode */
+  height: auto; /* Maintain aspect ratio */
+  max-width: 100%; /* Ensure it doesn't exceed 100% of parent container */
+  max-height: 50vh; /* Ensure it doesn't exceed 50% of viewport height */
+  object-fit: contain; /* Maintain aspect ratio and fit within container */
+  border-radius: 8px;
+}
+
+/* Live Question State:
+   - Live question is prominently centered
+   - Event name is hidden
+   - QR code and URL remain visible in the lower-left corner
+   - Total QR + URL widget size is strictly capped at <= 25vw width and <= 25vh height,
+     ensuring it occupies <= 1/16 (6.25%) of the total screen area (well below the 1/4 limit)
+*/
+body.has-live-question #live-question-container {
+  display: flex;
+  padding-bottom: 4vh;
+}
+
+body.has-live-question #event-name {
+  display: none !important;
+}
+
+body.has-live-question #qr-container {
+  position: fixed;
+  bottom: 24px;
+  left: 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  text-align: left;
+  max-width: 25vw;
+  max-height: 25vh;
+  padding: 12px 14px;
+  background: rgba(20, 20, 20, 0.88);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 12px;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+  z-index: 100;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+body.has-live-question #qr-code-container {
+  margin-bottom: 8px;
+  line-height: 0;
+  display: block;
+}
+
+body.has-live-question #qr-code-container img,
+body.has-live-question #qr-code-container canvas {
+  width: auto;
+  height: auto;
+  max-height: 16vh;
+  max-width: 16vh;
+  aspect-ratio: 1;
+  object-fit: contain;
+  border-radius: 6px;
+}
+
+body.has-live-question #event-url {
+  font-size: clamp(11px, calc(0.6vh + 0.6vw + 3px), 15px);
+  color: rgba(255, 255, 255, 0.92);
+  margin-top: 0;
+  line-height: 1.3;
+  word-break: break-word;
+  max-width: 100%;
+}
+
+@media (max-width: 600px), (max-aspect-ratio: 1/1) {
+  body.has-live-question #qr-container {
+    max-width: 45vw;
+    max-height: 30vh;
+    bottom: 12px;
+    left: 12px;
+    padding: 8px 10px;
+  }
+
+  body.has-live-question #qr-code-container img,
+  body.has-live-question #qr-code-container canvas {
+    max-height: 14vh;
+    max-width: 14vh;
+  }
+
+  body.has-live-question #event-url {
+    font-size: 11px;
+  }
+}
+
