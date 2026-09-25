@@ -6,14 +6,23 @@
   <title>Live Question</title>
   <link id="theme-stylesheet" rel="stylesheet" href="/themes/live/default.css">
   <style>
-    /* Ensure lower-left constraint is enforced regardless of theme */
+    /* Ensure lower-left constraint and centering are enforced regardless of theme */
     body.has-live-question #qr-container {
       position: fixed;
       bottom: 24px;
       left: 24px;
       max-width: 25vw;
       max-height: 25vh;
+      width: fit-content;
+      align-items: center;
+      text-align: center;
       z-index: 100;
+    }
+    body.has-live-question #qr-code-container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      width: 100%;
     }
   </style>
 </head>
